@@ -23,6 +23,14 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
 
+      - uses: actions/cache@v3
+        with:
+          path:
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -35,6 +43,10 @@ jobs:
       - run: npm ci --production && npm run build
 
       - name: Deploy with rsync
-        run: rsync -azP --no-perms --no-owner --no-group --no-times --delete --include ".next/*" --include "package.json" --include "package-lock.json" --include "next.config.js" ./ ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
+        run:
+          - rsync -azP --no-perms --no-owner --no-group --no-times --delete ./next ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
+          - rsync -azP --no-perms --no-owner --no-group --no-times --delete ./package.json ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
+          - rsync -azP --no-perms --no-owner --no-group --no-times --delete ./package-lock.json ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
+          - rsync -azP --no-perms --no-owner --no-group --no-times --delete ./next.config.js ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
 
       - run: ssh ubuntu@${{ secrets.SSH_HOST }} 'bash -ic "cd ${{ secrets.SSH_PATH }}; npm ci && pm2 restart grenade-cave"'
