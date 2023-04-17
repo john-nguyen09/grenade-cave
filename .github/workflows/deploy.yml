@@ -35,6 +35,6 @@ jobs:
       - run: npm ci --production && npm run build
 
       - name: Deploy with rsync
-        run: rsync -azP --no-perms --no-owner --no-group --no-times --delete --exclude=.git ./ ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
+        run: rsync -azP --no-perms --no-owner --no-group --no-times --delete --filter=':- .gitignore' --exclude=.git ./ ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
 
-      - run: ssh ubuntu@${{ secrets.SSH_HOST }} 'bash -ic "pm2 restart grenade-cave"'
+      - run: ssh ubuntu@${{ secrets.SSH_HOST }} 'bash -ic "cd ${{ secrets.SSH_PATH }}; npm ci && pm2 restart grenade-cave"'

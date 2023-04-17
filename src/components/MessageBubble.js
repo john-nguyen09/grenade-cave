@@ -112,13 +112,13 @@ function MessageBubble({ messageBubbleRef }) {
     setIsBrowser(true);
   }, []);
 
-  if (!isBrowser || !messageBubbleRef.current) {
+  if (!isBrowser || !messageBubbleRef) {
     return null;
   }
 
   return ReactDOM.createPortal(
     <MessageBubbleContent />,
-    messageBubbleRef.current
+    messageBubbleRef
   );
 }
 
