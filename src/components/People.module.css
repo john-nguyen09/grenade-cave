@@ -1,0 +1,50 @@
+.container {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+}
+
+.users {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 8px 0;
+  align-items: flex-start;
+}
+
+.user {
+  padding-left: 8px;
+  padding-right: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.editButton {
+  margin-left: 8px;
+}
+
+.chat {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -15px 0px 35px -11px rgba(152, 191, 100, 0.1);
+}
+
+.messages {
+  flex: 1;
+}
+
+.message {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  display: flex;
+}
+
+.author {
+  margin-right: 6px;
+}
+
+.sentAt {
+  margin-left: auto;
+  font-size: 9px;
+}

@@ -1,0 +1,30 @@
+.container {
+  position: absolute;
+  top: 50%;
+  width: 30%;
+  right: 36px;
+  bottom: 54px;
+  overflow: hidden;
+}
+
+.disappearingMessage {
+  position: absolute;
+  right: 0;
+  animation: moveUpAndDisappear 12s linear;
+}
+
+@keyframes moveUpAndDisappear {
+  0% {
+    top: 100%;
+    opacity: 1;
+  }
+
+  70% {
+    top: 20%;
+  }
+
+  100% {
+    top: -24px;
+    opacity: 0;
+  }
+}

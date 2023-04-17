@@ -1,0 +1,40 @@
+name: Deploy Next App
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: rsync
+          version: 1.0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - run: npm ci --production && npm run build
+
+      - name: Deploy with rsync
+        run: rsync -azP --no-perms --no-owner --no-group --no-times --delete --exclude=.git ./ ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
+
+      - run: ssh ubuntu@${{ secrets.SSH_HOST }} 'bash -ic "pm2 restart grenade-cave"'
