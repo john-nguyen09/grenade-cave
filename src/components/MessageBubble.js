@@ -11,7 +11,7 @@ const MESSAGE_INSERT_DURATION = 1000;
 
 const messageState = {
   idCounter: 1,
-  after: 0,
+  after: new Date().getTime(),
   messageQueue: new MinPriorityQueue((message) => message.sentAt),
   container: null,
   timeout: null,

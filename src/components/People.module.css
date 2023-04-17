@@ -3,6 +3,12 @@
   grid-template-columns: 3fr 1fr;
 }
 
+@media screen and (max-width: 767px) and (max-height: 500px) {
+  .container {
+    grid-template-columns: 2fr 3fr;
+  }
+}
+
 .users {
   display: flex;
   flex-wrap: wrap;
