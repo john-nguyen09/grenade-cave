@@ -4,9 +4,8 @@ import {
   ensureInit,
   localKV,
   messageStore,
-  userExit,
+  store,
   userInit,
-  userStore,
 } from '@/lib/liveStore';
 import { useEffect, useState } from 'react';
 import styles from './People.module.css';
@@ -24,7 +23,7 @@ function People() {
 
   useEffect(() => {
     const onUserChange = () => {
-      setUsers(userStore.yarray.map(({ val }) => val));
+      setUsers(Array.from(store.awareness.getStates().values()));
     };
 
     const onMessageUpdate = () => {
@@ -32,7 +31,7 @@ function People() {
     };
 
     ensureInit(() => {
-      userStore.on('change', onUserChange);
+      store.awareness.on('update', onUserChange);
       messageStore.observe(onMessageUpdate);
 
       userInit();
@@ -44,10 +43,9 @@ function People() {
     }, 1000);
 
     return () => {
-      userStore.off('change', onUserChange);
+      store.awareness.off('update', onUserChange);
       messageStore.unobserve(onMessageUpdate);
       clearInterval(interval);
-      userExit();
     };
   }, []);
 
@@ -105,7 +103,7 @@ function People() {
             return (
               <div key={index} className={styles.message}>
                 <div style={{ color }} className={styles.author}>
-                  {name}:{' '}
+                  {name}
                 </div>
                 <div className={styles.messageText}>{text}</div>
                 {relativeDate && (

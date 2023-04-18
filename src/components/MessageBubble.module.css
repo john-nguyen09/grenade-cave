@@ -5,11 +5,12 @@
   right: 36px;
   bottom: 54px;
   overflow: hidden;
-}
+  word-break: break-all;
 
-@media screen and (max-width: 767px) {
-  .container {
-    top: 0;
+  @media screen and (max-width: 767px) {
+    top: auto;
+    height: calc(100% - 54px);
+    max-height: 380px;
   }
 }
 

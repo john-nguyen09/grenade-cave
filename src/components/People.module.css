@@ -1,11 +1,9 @@
 .container {
   display: grid;
   grid-template-columns: 3fr 1fr;
-}
 
-@media screen and (max-width: 767px) and (max-height: 500px) {
-  .container {
-    grid-template-columns: 2fr 3fr;
+  @media screen and (max-width: 767px) {
+    grid-template-columns: 30fr 70fr;
   }
 }
 
@@ -15,6 +13,8 @@
   width: 100%;
   padding: 8px 0;
   align-items: flex-start;
+  align-content: flex-start;
+  row-gap: 8px;
 }
 
 .user {
@@ -22,6 +22,7 @@
   padding-right: 8px;
   display: flex;
   align-items: center;
+  word-break: break-all;
 }
 
 .editButton {
@@ -45,13 +46,28 @@
   border-bottom: 1px solid #eee;
   font-size: 14px;
   display: flex;
+
+  @media screen and (max-width: 767px) {
+    padding: 8px 12px;
+  }
 }
 
 .author {
   margin-right: 6px;
+  flex: auto;
+  word-break: break-all;
+  min-width: 60px;
+}
+
+.messageText {
+  margin-right: 6px;
+  flex: 1 1 100%;
+  word-break: break-all;
 }
 
 .sentAt {
   margin-left: auto;
   font-size: 9px;
+  flex: 0 0 50px;
+  text-align: right;
 }

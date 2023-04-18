@@ -7,16 +7,16 @@ import { generateName } from './name';
 import { generateColor } from './color';
 import { LIVE_STATE_URL } from './constants';
 
-const store = {
+export const store = {
   globalDoc: new Y.Doc(),
   localDoc: new Y.Doc(),
   persist: null,
   ws: null,
+  awareness: null,
 };
 
 const { globalDoc, localDoc } = store;
 const kv = new YKeyValue(globalDoc.getArray('global'));
-export const userStore = new YKeyValue(globalDoc.getArray('users'));
 export const messageStore = globalDoc.getArray('messages');
 export const localKV = new YKeyValue(localDoc.getArray('local'));
 let promiseChain = init();
@@ -28,9 +28,11 @@ export async function init() {
   const wsProvider = new WebsocketProvider(LIVE_STATE_URL, docName, globalDoc);
   const localProvider = new IndexeddbPersistence(`${docName}-local`, localDoc);
   const promises = [];
+  const { awareness } = wsProvider;
 
   store.persist = provider;
   store.ws = wsProvider;
+  store.awareness = awareness;
 
   promises.push(
     new Promise((resolve) => {
@@ -69,12 +71,9 @@ export function userEnter() {
   console.log(
     `Entering as: ${localKV.get('user.id')} - ${localKV.get('user.name')}`
   );
-  window.addEventListener('beforeunload', () => {
-    userExit();
-  });
 
   const updateUserToGlobalStore = () => {
-    userStore.set(localKV.get('user.id'), {
+    store.ws.awareness.setLocalState({
       id: localKV.get('user.id'),
       name: localKV.get('user.name'),
       color: localKV.get('user.color'),
@@ -85,10 +84,6 @@ export function userEnter() {
   localKV.on('change', () => {
     updateUserToGlobalStore();
   });
-}
-
-export function userExit() {
-  userStore.delete(localKV.get('user.id'));
 }
 
 export function ensureInit(cb) {

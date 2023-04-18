@@ -11,6 +11,10 @@
   background-color: transparent;
   padding: 12px 16px;
   transition: all 0.2s ease-in-out;
+
+  @media screen and (max-width: 767px) {
+    padding: 12px;
+  }
 }
 
 .sendButton {
