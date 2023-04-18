@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+}
+
+.deadButton {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dangerousFormBody {
+  margin-top: 24px;
+}
+
+.dangerousFormBody {
+  display: grid;
+  gap: 12px;
+}
+
+.formInline {
+  display: flex;
+}
+
+.sourceInput {
+  width: 370px;
+  max-width: 100%;
+}

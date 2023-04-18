@@ -15,6 +15,7 @@ import Modal from './Modal';
 import EditUserForm from './EditUserForm';
 import MessageForm from './MessageForm';
 import { format, formatDistance, formatRelative, isSameDay } from 'date-fns';
+import Settings from './Settings';
 
 function People() {
   const [users, setUsers] = useState([]);
@@ -56,34 +57,37 @@ function People() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.users}>
-        {users.map((user) => {
-          const isCurrent = user.id === localKV.get('user.id');
+      <div>
+        <Settings />
+        <div className={styles.users}>
+          {users.map((user) => {
+            const isCurrent = user.id === localKV.get('user.id');
 
-          return (
-            <div
-              key={user.id}
-              className={styles.user}
-              style={{ color: user.color }}
-            >
-              {user.name} {isCurrent && '(You)'}
-              {isCurrent && (
-                <a
-                  href="#"
-                  className={styles.editButton}
-                  onClick={handleEditUserNameClick}
-                >
-                  <Image
-                    src={Pencil.src}
-                    width={16}
-                    height={16}
-                    alt="Edit your name"
-                  />
-                </a>
-              )}
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={user.id}
+                className={styles.user}
+                style={{ color: user.color }}
+              >
+                {user.name} {isCurrent && '(You)'}
+                {isCurrent && (
+                  <a
+                    href="#"
+                    className={styles.editButton}
+                    onClick={handleEditUserNameClick}
+                  >
+                    <Image
+                      src={Pencil.src}
+                      width={16}
+                      height={16}
+                      alt="Edit your name"
+                    />
+                  </a>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
       <div className={styles.chat}>
         <MessageForm />

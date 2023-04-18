@@ -12,3 +12,12 @@
   border-color: var(--accent);
   background-color: var(--dark-accent);
 }
+
+.button.danger {
+  background-color: var(--red);
+}
+
+.button.danger:hover {
+  background-color: var(--light-red);
+  border-color: var(--light-red);
+}

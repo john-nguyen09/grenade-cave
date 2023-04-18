@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import 'hls.js';
-import { DEFAULT_WEBRTC } from '@/lib/constants';
 import styles from './Player.module.css';
 import MessageBubble from './MessageBubble';
+import { getUserSource } from '@/lib/source';
 
 function Player() {
   const ref = useRef();
@@ -23,7 +23,7 @@ function Player() {
         volume: 25,
         autoStart: false,
         mute: false,
-        sources: [DEFAULT_WEBRTC],
+        sources: [getUserSource()],
         webrtcConfig: {
           timeoutMaxRetry: 4,
           connectionTimeout: 10000,

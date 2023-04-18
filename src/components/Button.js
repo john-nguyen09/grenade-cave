@@ -1,8 +1,12 @@
+import classNames from 'classnames';
 import styles from './Button.module.css';
 
-function Button({ children, ...props }) {
+function Button({ children, appendClassName, variant = 'primary', ...props }) {
   return (
-    <button className={styles.button} {...props}>
+    <button
+      className={classNames(styles.button, styles[variant], appendClassName)}
+      {...props}
+    >
       {children}
     </button>
   );

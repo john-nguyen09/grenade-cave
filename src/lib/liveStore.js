@@ -16,7 +16,7 @@ export const store = {
 };
 
 const { globalDoc, localDoc } = store;
-const kv = new YKeyValue(globalDoc.getArray('global'));
+export const globalKV = new YKeyValue(globalDoc.getArray('global'));
 export const messageStore = globalDoc.getArray('messages');
 export const localKV = new YKeyValue(localDoc.getArray('local'));
 let promiseChain = init();
@@ -63,7 +63,7 @@ export function userInit() {
 
   localKV.set('user.id', uuidv4());
   localKV.set('user.name', generateName());
-  localKV.set('user.color', generateColor(kv));
+  localKV.set('user.color', generateColor(globalKV));
   userEnter();
 }
 

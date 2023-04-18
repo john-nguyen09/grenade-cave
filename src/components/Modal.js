@@ -9,6 +9,7 @@ import Image from 'next/image';
 function Modal({ show, closeOnOverlayClick, onClose, title, children }) {
   const [isBrowser, setIsBrowser] = useState(false);
   const modalRef = useRef();
+  const initialElRef = useRef();
 
   useEffect(() => {
     setIsBrowser(true);
@@ -36,8 +37,12 @@ function Modal({ show, closeOnOverlayClick, onClose, title, children }) {
   };
 
   const handleCloseOverlay = (e) => {
+    if (!initialElRef.current) {
+      return;
+    }
+
     if (closeOnOverlayClick) {
-      if (modalRef.current.contains(e.target)) {
+      if (modalRef.current.contains(initialElRef.current)) {
         return;
       }
       onClose && onClose();
@@ -45,7 +50,11 @@ function Modal({ show, closeOnOverlayClick, onClose, title, children }) {
   };
 
   const modalContent = show ? (
-    <div className={styles.overlay} onClick={handleCloseOverlay}>
+    <div
+      className={styles.overlay}
+      onMouseDown={(e) => (initialElRef.current = e.target)}
+      onClick={handleCloseOverlay}
+    >
       <div className={styles.modal} ref={modalRef}>
         <div className={styles.header}>
           {title && <h3 className={styles.title}>{title}</h3>}
