@@ -22,6 +22,10 @@ export const localKV = new YKeyValue(localDoc.getArray('local'));
 let promiseChain = init();
 
 export async function init() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   const docName = 'grenade-cave';
 
   const provider = new IndexeddbPersistence(`${docName}-global`, globalDoc);

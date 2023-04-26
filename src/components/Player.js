@@ -5,49 +5,95 @@ import 'hls.js';
 import styles from './Player.module.css';
 import MessageBubble from './MessageBubble';
 import { getUserSource } from '@/lib/source';
+import { globalKV } from '@/lib/liveStore';
 
 function Player() {
-  const ref = useRef();
   const player = useRef();
   const [messageBubbleRef, setMessageBubbleRef] = useState();
 
   useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-
     const unsubscribes = [];
 
     import('ovenplayer').then((OvenPlayer) => {
-      const ovenPlayer = OvenPlayer.create(ref.current, {
-        volume: 25,
-        autoStart: false,
-        mute: false,
-        sources: [getUserSource()],
-        webrtcConfig: {
-          timeoutMaxRetry: 4,
-          connectionTimeout: 10000,
-        },
-      });
-      player.current = ovenPlayer;
+      let ovenPlayer = null;
+      let reloadTimeout = null;
 
-      const messageBubbleEl = document.createElement('div');
-      ovenPlayer.getContainerElement().appendChild(messageBubbleEl);
-      setMessageBubbleRef(messageBubbleEl);
+      const updateReload = () => {
+        if (!ovenPlayer) {
+          return;
+        }
+
+        if (
+          !globalKV.get('settings.autoReload') ||
+          !globalKV.get('settings.autoReloadInterval')
+        ) {
+          return;
+        }
+
+        ovenPlayer.once('error', (e) => {
+          console.log(e);
+
+          if (reloadTimeout) {
+            clearTimeout(reloadTimeout);
+            reloadTimeout = null;
+          }
+
+          reloadTimeout = setTimeout(() => {
+            unloadPlayer();
+            loadPlayer();
+          }, globalKV.get('settings.autoReloadInterval'));
+        });
+      };
+
+      const loadPlayer = () => {
+        if (ovenPlayer) {
+          ovenPlayer.remove();
+          ovenPlayer = null;
+        }
+
+        ovenPlayer = OvenPlayer.create('player', {
+          volume: 100,
+          autoStart: true,
+          autoFallback: true,
+          mute: false,
+          sources: [getUserSource()],
+          webrtcConfig: {
+            timeoutMaxRetry: 4,
+            connectionTimeout: 10000,
+          },
+        });
+        player.current = ovenPlayer;
+
+        const messageBubbleEl = document.createElement('div');
+        ovenPlayer.getContainerElement().appendChild(messageBubbleEl);
+        setMessageBubbleRef(messageBubbleEl);
+
+        updateReload();
+      };
+
+      const unloadPlayer = () => {
+        ovenPlayer && ovenPlayer.remove();
+        ovenPlayer = null;
+        player.current = null;
+      };
+
+      globalKV.on('change', updateReload);
+      loadPlayer();
 
       unsubscribes.push(() => {
-        ovenPlayer.remove();
+        unloadPlayer();
+        globalKV.off('change', updateReload);
       });
     });
 
     return () => {
       unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
-  }, [ref]);
+  }, []);
 
   return (
     <>
-      <div ref={ref} className={styles.player}></div>
+      <div className={styles.player} id="player"></div>
       <MessageBubble messageBubbleRef={messageBubbleRef} />
     </>
   );

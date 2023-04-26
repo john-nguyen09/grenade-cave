@@ -7,6 +7,7 @@ import { globalKV, localKV, messageStore } from '@/lib/liveStore';
 import styles from './Settings.module.css';
 import Input from './Input';
 import { getDefaultSource, getUserSource } from '@/lib/source';
+import Checkbox from './Checkbox';
 
 function SettingsForm() {
   const [userSource, setUserSource] = useState('');
@@ -39,17 +40,23 @@ function SettingsForm() {
 function DangerousSettingsForm() {
   const [show, setShow] = useState(false);
   const [defaultSource, setDefaultSource] = useState('');
+  const [autoReload, setAutoReload] = useState(false);
+  const [autoReloadInterval, setAutoReloadInterval] = useState('');
 
   const handleOnClearMessagesClick = () => {
     messageStore.delete(0, messageStore.length);
   };
 
-  const handleSaveSourceClick = () => {
+  const handleSaveClick = () => {
     globalKV.set('settings.defaultSourceURL', defaultSource);
+    globalKV.set('settings.autoReload', autoReload);
+    globalKV.set('settings.autoReloadInterval', autoReloadInterval);
   };
 
   useEffect(() => {
     setDefaultSource(getDefaultSource().file);
+    setAutoReload(globalKV.get('settings.autoReload'));
+    setAutoReloadInterval(globalKV.get('settings.autoReloadInterval'));
   }, []);
 
   return (
@@ -72,8 +79,23 @@ function DangerousSettingsForm() {
               onChange={(e) => setDefaultSource(e.target.value)}
               value={defaultSource}
             />
-            <Button onClick={handleSaveSourceClick}>Save</Button>
           </div>
+
+          <Checkbox
+            label="Auto reload"
+            appendClassName={styles.autoReloadCheckbox}
+            checked={autoReload}
+            onChange={(e) => setAutoReload(e.target.checked)}
+          />
+
+          <Input
+            type="text"
+            placeholder="Auto reload interval"
+            value={autoReloadInterval}
+            onChange={(e) => setAutoReloadInterval(e.target.value)}
+          />
+
+          <Button onClick={handleSaveClick}>Save</Button>
         </div>
       )}
     </div>
