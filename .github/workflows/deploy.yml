@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
 env:
-  SENTRY_DSN: ${{ env.SENTRY_DSN }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 jobs:
   build:
     runs-on: ubuntu-20.04
