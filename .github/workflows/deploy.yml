@@ -45,8 +45,6 @@ jobs:
       - name: Deploy with rsync
         run: |
           rsync -azP --no-perms --no-owner --no-group --no-times --delete ./.next ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
-          rsync -azP --no-perms --no-owner --no-group --no-times --delete ./package.json ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
-          rsync -azP --no-perms --no-owner --no-group --no-times --delete ./package-lock.json ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
           rsync -azP --no-perms --no-owner --no-group --no-times --delete ./next.config.js ubuntu@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PATH }}
 
-      - run: ssh ubuntu@${{ secrets.SSH_HOST }} 'bash -ic "cd ${{ secrets.SSH_PATH }}; npm ci && pm2 restart grenade-cave"'
+      - run: ssh ubuntu@${{ secrets.SSH_HOST }} 'bash -ic "cd ${{ secrets.SSH_PATH }}; pm2 restart grenade-cave"'
