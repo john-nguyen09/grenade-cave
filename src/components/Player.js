@@ -1,22 +1,24 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import 'hls.js';
+import { useEffect, useState } from 'react';
 import styles from './Player.module.css';
 import MessageBubble from './MessageBubble';
 import { getUserSource } from '@/lib/source';
-import { globalKV } from '@/lib/liveStore';
+import { ensureInit, globalKV } from '@/lib/liveStore';
 
 function Player() {
-  const player = useRef();
   const [messageBubbleRef, setMessageBubbleRef] = useState();
 
   useEffect(() => {
     const unsubscribes = [];
 
-    import('ovenplayer').then((OvenPlayer) => {
-      let ovenPlayer = null;
-      let reloadTimeout = null;
+    let ovenPlayer = null;
+    let reloadTimeout = null;
+
+    const initPlayer = async () => {
+      const Hls = (await import('hls.js')).default;
+      window.Hls = Hls;
+      const OvenPlayer = (await import('ovenplayer')).default;
 
       const updateReload = () => {
         if (!ovenPlayer) {
@@ -62,7 +64,6 @@ function Player() {
             connectionTimeout: 10000,
           },
         });
-        player.current = ovenPlayer;
 
         const messageBubbleEl = document.createElement('div');
         ovenPlayer.getContainerElement().appendChild(messageBubbleEl);
@@ -74,17 +75,18 @@ function Player() {
       const unloadPlayer = () => {
         ovenPlayer && ovenPlayer.remove();
         ovenPlayer = null;
-        player.current = null;
       };
 
       globalKV.on('change', updateReload);
-      loadPlayer();
+      ensureInit(() => loadPlayer());
 
       unsubscribes.push(() => {
         unloadPlayer();
         globalKV.off('change', updateReload);
       });
-    });
+    };
+
+    initPlayer();
 
     return () => {
       unsubscribes.forEach((unsubscribe) => unsubscribe());
