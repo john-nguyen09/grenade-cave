@@ -57,7 +57,7 @@ export function useNekoClient() {
   const [userInControl] = useLiveState(globalKV, 'control.userId');
 
   useEffect(() => {
-    ws.current = new WebSocket('ws://cave.thuan.au:4001/?type=client');
+    ws.current = new WebSocket('wss://cave.thuan.au/live-control?type=client');
 
     return () => {
       ws.current.close();
