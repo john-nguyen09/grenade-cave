@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Modal from './Modal';
 import Button from './Button';
 import Cog from '@/assets/images/cog.svg';
-import { globalKV, localKV, messageStore } from '@/lib/liveStore';
+import { globalKV, localKV, messageStore, useLiveState } from '@/lib/liveStore';
 import styles from './Settings.module.css';
 import Input from './Input';
 import { getDefaultSource, getUserSource } from '@/lib/source';
@@ -106,6 +106,13 @@ function Settings() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showDangerousSettingsModal, setShowDangerousSettingsModal] =
     useState(false);
+  const [showChat, setShowChat] = useLiveState(localKV, 'settings.showChat');
+  const [userInControl, setUserInControl] = useLiveState(
+    globalKV,
+    'control.userId'
+  );
+
+  const isInControl = localKV.get('user.id') === userInControl;
 
   return (
     <div className={styles.container}>
@@ -117,13 +124,28 @@ function Settings() {
       </Button>
       <Button
         type="button"
-        appendClassName={styles.deadButton}
         variant="danger"
         onClick={() =>
           setShowDangerousSettingsModal(!showDangerousSettingsModal)
         }
       >
         💀
+      </Button>
+      <Button
+        type="button"
+        title="Control player"
+        onClick={() =>
+          setUserInControl(isInControl ? null : localKV.get('user.id'))
+        }
+      >
+        {isInControl ? 'Controlling' : 'Take control'}
+      </Button>
+      <Button
+        type="button"
+        onClick={() => setShowChat(!showChat)}
+        title="Show chat"
+      >
+        💬
       </Button>
 
       <Modal

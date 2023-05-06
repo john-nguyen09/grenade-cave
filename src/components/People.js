@@ -5,6 +5,7 @@ import {
   localKV,
   messageStore,
   store,
+  useLiveState,
   userInit,
 } from '@/lib/liveStore';
 import { useEffect, useState } from 'react';
@@ -16,11 +17,17 @@ import EditUserForm from './EditUserForm';
 import MessageForm from './MessageForm';
 import { format, formatDistance, formatRelative, isSameDay } from 'date-fns';
 import Settings from './Settings';
+import classNames from 'classnames';
 
 function People() {
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [showChat, setShowChat] = useLiveState(
+    localKV,
+    'settings.showChat',
+    false
+  );
 
   useEffect(() => {
     const onUserChange = () => {
@@ -89,7 +96,11 @@ function People() {
           })}
         </div>
       </div>
-      <div className={styles.chat}>
+      <div
+        className={classNames(styles.chat, {
+          [styles.open]: showChat,
+        })}
+      >
         <MessageForm />
         <div className={styles.messages}>
           {messages.map(({ name, color, text, sentAt }, index) => {

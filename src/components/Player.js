@@ -5,9 +5,11 @@ import styles from './Player.module.css';
 import MessageBubble from './MessageBubble';
 import { getUserSource } from '@/lib/source';
 import { ensureInit, globalKV } from '@/lib/liveStore';
+import ControlLayer from './ControlLayer';
 
 function Player() {
   const [messageBubbleRef, setMessageBubbleRef] = useState();
+  const [controlLayerRef, setControlLayerRef] = useState();
 
   useEffect(() => {
     const unsubscribes = [];
@@ -69,6 +71,10 @@ function Player() {
         ovenPlayer.getContainerElement().appendChild(messageBubbleEl);
         setMessageBubbleRef(messageBubbleEl);
 
+        const controlLayerEl = document.createElement('div');
+        ovenPlayer.getContainerElement().appendChild(controlLayerEl);
+        setControlLayerRef(controlLayerEl);
+
         updateReload();
       };
 
@@ -97,6 +103,7 @@ function Player() {
     <>
       <div className={styles.player} id="player"></div>
       <MessageBubble messageBubbleRef={messageBubbleRef} />
+      <ControlLayer controlLayerRef={controlLayerRef} />
     </>
   );
 }

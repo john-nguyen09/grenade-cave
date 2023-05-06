@@ -1,0 +1,16 @@
+.root {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  cursor: default;
+  outline: 0;
+  border: 0;
+  color: transparent;
+  background: transparent;
+  resize: none;
+
+  aspect-ratio: 16 / 9;
+}

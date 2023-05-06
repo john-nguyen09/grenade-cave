@@ -6,6 +6,7 @@ import { YKeyValue } from 'y-utility/y-keyvalue';
 import { generateName } from './name';
 import { generateColor } from './color';
 import { LIVE_STATE_URL } from './constants';
+import { useEffect, useState } from 'react';
 
 export const store = {
   globalDoc: new Y.Doc(),
@@ -104,4 +105,25 @@ export function messageAdd(text) {
   }
 
   messageStore.unshift([{ id, name, color, text, sentAt: new Date().getTime() }]);
+}
+
+export function useLiveState(kv, name, initialValue = undefined) {
+  const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    kv.set(name, value);
+  }, [kv, name, value]);
+
+  useEffect(() => {
+    const syncState = () => {
+      setValue(kv.get(name));
+    };
+
+    kv.on("change", syncState);
+    return () => {
+      kv.off("change", syncState);
+    };
+  }, [kv, name]);
+
+  return [value, setValue];
 }
