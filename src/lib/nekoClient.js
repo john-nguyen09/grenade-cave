@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { globalKV, localKV, useLiveState } from './liveStore';
 import GuacamoleKeyboard from './guacamole-keyboard';
 
@@ -55,14 +55,29 @@ function encodeData(event, data) {
 export function useNekoClient() {
   const ws = useRef(null);
   const [userInControl] = useLiveState(globalKV, 'control.userId');
+  const [connectCount, setConnectCount] = useState(0);
 
   useEffect(() => {
     ws.current = new WebSocket('wss://cave.thuan.au/live-control?type=client');
 
-    return () => {
-      ws.current.close();
+    ws.current.onclose = () => {
       ws.current = null;
+      // Re-try to connect
+      setTimeout(() => {
+        setConnectCount(connectCount + 1);
+      }, 5000);
     };
+
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+        ws.current = null;
+      }
+    };
+  }, [connectCount]);
+
+  useEffect(() => {
+    setConnectCount((count) => count + 1);
   }, []);
 
   const sendData = (event, data) => {
