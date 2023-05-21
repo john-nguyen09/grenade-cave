@@ -6,6 +6,7 @@ import MessageBubble from './MessageBubble';
 import { getUserSource } from '@/lib/source';
 import { ensureInit, globalKV } from '@/lib/liveStore';
 import ControlLayer from './ControlLayer';
+import NekoClientProvider from './NekoClientProvider';
 
 function Player() {
   const [messageBubbleRef, setMessageBubbleRef] = useState();
@@ -100,11 +101,11 @@ function Player() {
   }, []);
 
   return (
-    <>
+    <NekoClientProvider>
       <div className={styles.player} id="player"></div>
       <MessageBubble messageBubbleRef={messageBubbleRef} />
       <ControlLayer controlLayerRef={controlLayerRef} />
-    </>
+    </NekoClientProvider>
   );
 }
 

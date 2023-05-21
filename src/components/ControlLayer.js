@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { createKeyboard, keyboardBind, useNekoClient } from '@/lib/nekoClient';
+import { createKeyboard } from '@/lib/nekoClient';
 import styles from './ControlLayer.module.css';
+import { useNekoClientContext } from './NekoClientProvider';
 
 const WHEEL_LINE_HEIGHT = 19;
 
@@ -51,7 +52,7 @@ const keyMap = (key) => {
 };
 
 function ControlLayerContent() {
-  const [sendData] = useNekoClient();
+  const [sendData] = useNekoClientContext();
   const [scrollInvert, setScrollInvert] = useState(true);
   const ref = useRef();
   const keyboard = useRef(createKeyboard());

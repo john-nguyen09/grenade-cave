@@ -8,6 +8,7 @@ import styles from './Settings.module.css';
 import Input from './Input';
 import { getDefaultSource, getUserSource } from '@/lib/source';
 import Checkbox from './Checkbox';
+import NekoClientProvider, { useNekoClientContext } from './NekoClientProvider';
 
 function SettingsForm() {
   const [userSource, setUserSource] = useState('');
@@ -42,6 +43,11 @@ function DangerousSettingsForm() {
   const [defaultSource, setDefaultSource] = useState('');
   const [autoReload, setAutoReload] = useState(false);
   const [autoReloadInterval, setAutoReloadInterval] = useState('');
+  const [,adminSendData] = useNekoClientContext();
+
+  const handleOnClickRestartPipeline = () => {
+    adminSendData('restartbroadcast');
+  };
 
   const handleOnClearMessagesClick = () => {
     messageStore.delete(0, messageStore.length);
@@ -69,6 +75,10 @@ function DangerousSettingsForm() {
 
       {show && (
         <div className={styles.dangerousFormBody}>
+          <Button onClick={handleOnClickRestartPipeline}>
+            Restart Pipeline
+          </Button>
+
           <Button onClick={handleOnClearMessagesClick}>Clear Messages</Button>
 
           <div className={styles.formInline}>
@@ -163,7 +173,9 @@ function Settings() {
         onClose={() => setShowDangerousSettingsModal(false)}
         closeOnOverlayClick
       >
-        <DangerousSettingsForm />
+        <NekoClientProvider>
+          <DangerousSettingsForm />
+        </NekoClientProvider>
       </Modal>
     </div>
   );

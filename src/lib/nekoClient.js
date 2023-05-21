@@ -7,6 +7,7 @@ export const OPCODE = Object.freeze({
   SCROLL: 0x02,
   KEY_DOWN: 0x03,
   KEY_UP: 0x04,
+  RESTART_BROADCAST: 0x06,
 });
 
 function encodeData(event, data) {
@@ -44,6 +45,28 @@ function encodeData(event, data) {
       payload.setUint8(0, OPCODE.KEY_UP);
       payload.setUint16(1, 8, true);
       payload.setBigUint64(3, BigInt(data.key), true);
+      break;
+    case 'restartbroadcast':
+      console.log('Here');
+      buffer = new ArrayBuffer(1);
+      payload = new DataView(buffer);
+      payload.setUint8(0, OPCODE.RESTART_BROADCAST);
+      break;
+    default:
+      this.emit('warn', `unknown data event: ${event}`);
+  }
+
+  return payload;
+}
+
+function encodeAdminTrigger(event) {
+  let buffer;
+  let payload;
+  switch (event) {
+    case 'restartbroadcast':
+      buffer = new ArrayBuffer(1);
+      payload = new DataView(buffer);
+      payload.setUint8(0, OPCODE.RESTART_BROADCAST);
       break;
     default:
       this.emit('warn', `unknown data event: ${event}`);
@@ -96,7 +119,19 @@ export function useNekoClient() {
     ws.current.send(encodeData(event, data));
   };
 
-  return [sendData];
+  const adminSendData = (event) => {
+    if (!ws.current) {
+      return;
+    }
+
+    if (ws.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    ws.current.send(encodeAdminTrigger(event));
+  };
+
+  return [sendData, adminSendData];
 }
 
 export function createKeyboard() {
