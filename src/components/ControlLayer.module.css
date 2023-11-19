@@ -11,6 +11,7 @@
   color: transparent;
   background: transparent;
   resize: none;
+  touch-action: none;
 
   aspect-ratio: 16 / 9;
 }

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { createKeyboard } from '@/lib/nekoClient';
 import styles from './ControlLayer.module.css';
 import { useNekoClientContext } from './NekoClientProvider';
+import { messageAdd } from '@/lib/liveStore';
 
 const WHEEL_LINE_HEIGHT = 19;
 
@@ -87,10 +88,74 @@ function ControlLayerContent() {
     };
   }, [ref, sendData]);
 
+  useEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+
+    if (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)
+    ) {
+      ref.current.setAttribute('readonly', 'readonly');
+
+      const handleTouchMove = (e) => {
+        e.preventDefault();
+      };
+
+      document.body.addEventListener('touchmove', handleTouchMove);
+
+      return () => {
+        document.body.removeEventListener('touchmove', handleTouchMove);
+      };
+    }
+  }, [ref]);
+
+  const onTouchHandler = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    let first = e.changedTouches[0];
+    let type = '';
+    switch (e.type) {
+      case 'touchstart':
+        type = 'mousedown';
+        break;
+      case 'touchmove':
+        type = 'mousemove';
+        break;
+      case 'touchend':
+        type = 'mouseup';
+        break;
+      default:
+        return;
+    }
+
+    const simulatedEvent = new MouseEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      screenX: first.screenX,
+      screenY: first.screenY,
+      clientX: first.clientX,
+      clientY: first.clientY,
+    });
+    first.target.dispatchEvent(simulatedEvent);
+  };
+
   return (
     <textarea
       ref={ref}
       className={styles.root}
+      tabIndex="0"
+      data-gramm="false"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+      onContextMenu={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
       onMouseMove={(e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -148,6 +213,9 @@ function ControlLayerContent() {
           }, 100);
         }
       }}
+      onTouchStart={onTouchHandler}
+      onTouchEnd={onTouchHandler}
+      onTouchMove={onTouchHandler}
     ></textarea>
   );
 }
