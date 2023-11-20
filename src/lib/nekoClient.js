@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { globalKV, localKV, useLiveState } from './liveStore';
 import GuacamoleKeyboard from './guacamole-keyboard';
 
@@ -81,21 +81,25 @@ export function useNekoClient() {
   const [connectCount, setConnectCount] = useState(0);
 
   useEffect(() => {
-    ws.current = new WebSocket('wss://cave.thuan.au/live-control?type=client');
+    const socket = new WebSocket(
+      'wss://cave.thuan.au/live-control?type=client'
+    );
 
-    ws.current.onclose = () => {
-      ws.current = null;
+    const onOpenHandler = () => (ws.current = socket);
+    socket.addEventListener('open', onOpenHandler);
+
+    const onCloseHandler = () => {
       // Re-try to connect
       setTimeout(() => {
         setConnectCount(connectCount + 1);
       }, 5000);
     };
+    socket.addEventListener('close', onCloseHandler);
 
     return () => {
-      if (ws.current) {
-        ws.current.close();
-        ws.current = null;
-      }
+      socket.removeEventListener('open', onOpenHandler);
+      socket.removeEventListener('close', onCloseHandler);
+      socket.close();
     };
   }, [connectCount]);
 
@@ -103,33 +107,39 @@ export function useNekoClient() {
     setConnectCount((count) => count + 1);
   }, []);
 
-  const sendData = (event, data) => {
-    if (!ws.current) {
-      return;
-    }
+  const sendData = useCallback(
+    (event, data) => {
+      if (!ws.current) {
+        return;
+      }
 
-    if (ws.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
+      if (ws.current.readyState !== WebSocket.OPEN) {
+        return;
+      }
 
-    if (userInControl !== localKV.get('user.id')) {
-      return;
-    }
+      if (userInControl !== localKV.get('user.id')) {
+        return;
+      }
 
-    ws.current.send(encodeData(event, data));
-  };
+      ws.current.send(encodeData(event, data));
+    },
+    [ws, userInControl]
+  );
 
-  const adminSendData = (event) => {
-    if (!ws.current) {
-      return;
-    }
+  const adminSendData = useCallback(
+    (event) => {
+      if (!ws.current) {
+        return;
+      }
 
-    if (ws.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
+      if (ws.current.readyState !== WebSocket.OPEN) {
+        return;
+      }
 
-    ws.current.send(encodeAdminTrigger(event));
-  };
+      ws.current.send(encodeAdminTrigger(event));
+    },
+    [ws]
+  );
 
   return [sendData, adminSendData];
 }
