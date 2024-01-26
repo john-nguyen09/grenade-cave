@@ -43,7 +43,9 @@ function DangerousSettingsForm() {
   const [defaultSource, setDefaultSource] = useState('');
   const [autoReload, setAutoReload] = useState(false);
   const [autoReloadInterval, setAutoReloadInterval] = useState('');
-  const [,adminSendData] = useNekoClientContext();
+  const [, adminSendData] = useNekoClientContext();
+  const [screenWidth, setScreenWidth] = useState(0);
+  const [screenHeight, setScreenHeight] = useState(0);
 
   const handleOnClickRestartPipeline = () => {
     adminSendData('restartbroadcast');
@@ -57,12 +59,16 @@ function DangerousSettingsForm() {
     globalKV.set('settings.defaultSourceURL', defaultSource);
     globalKV.set('settings.autoReload', autoReload);
     globalKV.set('settings.autoReloadInterval', autoReloadInterval);
+    globalKV.set('settings.screenWidth', screenWidth);
+    globalKV.set('settings.screenHeight', screenHeight);
   };
 
   useEffect(() => {
     setDefaultSource(getDefaultSource().file);
     setAutoReload(globalKV.get('settings.autoReload'));
     setAutoReloadInterval(globalKV.get('settings.autoReloadInterval'));
+    setScreenWidth(globalKV.get('settings.screenWidth') || 1920);
+    setScreenHeight(globalKV.get('settings.screenHeight') || 1080);
   }, []);
 
   return (
@@ -104,6 +110,21 @@ function DangerousSettingsForm() {
             value={autoReloadInterval}
             onChange={(e) => setAutoReloadInterval(e.target.value)}
           />
+
+          <div className={styles.formInline}>
+            <Input
+              type="number"
+              placeholder="Screen Width (px)"
+              value={screenWidth}
+              onChange={(e) => setScreenWidth(e.target.value)}
+            />
+            <Input
+              type="number"
+              placeholder="Screen Height (px)"
+              value={screenHeight}
+              onChange={(e) => setScreenHeight(e.target.value)}
+            />
+          </div>
 
           <Button onClick={handleSaveClick}>Save</Button>
         </div>

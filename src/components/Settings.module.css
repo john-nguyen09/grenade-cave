@@ -15,6 +15,7 @@
 
 .formInline {
   display: flex;
+  gap: 8px;
 }
 
 .sourceInput {

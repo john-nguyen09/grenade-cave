@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { createKeyboard } from '@/lib/nekoClient';
 import styles from './ControlLayer.module.css';
 import { useNekoClientContext } from './NekoClientProvider';
-import { messageAdd } from '@/lib/liveStore';
+import { globalKV, useLiveState } from '@/lib/liveStore';
 
 const WHEEL_LINE_HEIGHT = 19;
 
@@ -59,8 +59,9 @@ function ControlLayerContent() {
   const keyboard = useRef(createKeyboard());
   const wheelThrottle = useRef(false);
 
-  const w = 1920;
-  const h = 1080;
+  const [w] = useLiveState(globalKV, 'settings.screenWidth', 1920);
+  const [h] = useLiveState(globalKV, 'settings.screenHeight', 1080);
+
   const scroll = 2;
 
   const sendMousePos = (e) => {
