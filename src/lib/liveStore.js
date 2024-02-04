@@ -108,7 +108,7 @@ export function messageAdd(text) {
 }
 
 export function useLiveState(kv, name, initialValue = undefined) {
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState(kv.get(name) || initialValue);
 
   useEffect(() => {
     kv.set(name, value);

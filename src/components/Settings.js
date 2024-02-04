@@ -6,20 +6,16 @@ import Cog from '@/assets/images/cog.svg';
 import { globalKV, localKV, messageStore, useLiveState } from '@/lib/liveStore';
 import styles from './Settings.module.css';
 import Input from './Input';
-import { getDefaultSource, getUserSource } from '@/lib/source';
+import { getDefaultSource } from '@/lib/source';
 import Checkbox from './Checkbox';
 import NekoClientProvider, { useNekoClientContext } from './NekoClientProvider';
 
 function SettingsForm() {
-  const [userSource, setUserSource] = useState('');
+  const [userSource, setUserSource] = useState(localKV.get('settings.sourceURL') || '');
 
   const handleSaveSourceClick = () => {
     localKV.set('settings.sourceURL', userSource);
   };
-
-  useEffect(() => {
-    setUserSource(getUserSource().file);
-  }, []);
 
   return (
     <div>
@@ -40,12 +36,13 @@ function SettingsForm() {
 
 function DangerousSettingsForm() {
   const [show, setShow] = useState(false);
-  const [defaultSource, setDefaultSource] = useState('');
-  const [autoReload, setAutoReload] = useState(false);
-  const [autoReloadInterval, setAutoReloadInterval] = useState('');
   const [, adminSendData] = useNekoClientContext();
-  const [screenWidth, setScreenWidth] = useState(0);
-  const [screenHeight, setScreenHeight] = useState(0);
+
+  const [defaultSource, setDefaultSource] = useState(getDefaultSource().file);
+  const [autoReload, setAutoReload] = useState(globalKV.get('settings.autoReload'));
+  const [autoReloadInterval, setAutoReloadInterval] = useState(globalKV.get('settings.autoReloadInterval'));
+  const [screenWidth, setScreenWidth] = useState(globalKV.get('settings.screenWidth') || 1920);
+  const [screenHeight, setScreenHeight] = useState(globalKV.get('settings.screenHeight') || 1080);
 
   const handleOnClickRestartPipeline = () => {
     adminSendData('restartbroadcast');
@@ -62,14 +59,6 @@ function DangerousSettingsForm() {
     globalKV.set('settings.screenWidth', screenWidth);
     globalKV.set('settings.screenHeight', screenHeight);
   };
-
-  useEffect(() => {
-    setDefaultSource(getDefaultSource().file);
-    setAutoReload(globalKV.get('settings.autoReload'));
-    setAutoReloadInterval(globalKV.get('settings.autoReloadInterval'));
-    setScreenWidth(globalKV.get('settings.screenWidth') || 1920);
-    setScreenHeight(globalKV.get('settings.screenHeight') || 1080);
-  }, []);
 
   return (
     <div>
