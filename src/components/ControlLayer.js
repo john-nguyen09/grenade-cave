@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { createKeyboard } from '@/lib/nekoClient';
 import styles from './ControlLayer.module.css';
@@ -64,14 +64,17 @@ function ControlLayerContent() {
 
   const scroll = 2;
 
-  const sendMousePos = (e) => {
-    const rect = e.target.getBoundingClientRect();
-    const destination = {
-      x: Math.round((w / rect.width) * (e.clientX - rect.left)),
-      y: Math.round((h / rect.height) * (e.clientY - rect.top)),
-    };
-    sendData('mousemove', destination);
-  };
+  const sendMousePos = useCallback(
+    (e) => {
+      const rect = e.target.getBoundingClientRect();
+      const destination = {
+        x: Math.round((w / rect.width) * (e.clientX - rect.left)),
+        y: Math.round((h / rect.height) * (e.clientY - rect.top)),
+      };
+      sendData('mousemove', destination);
+    },
+    [h, w, sendData]
+  );
 
   useEffect(() => {
     if (!ref.current) {
@@ -143,6 +146,55 @@ function ControlLayerContent() {
     first.target.dispatchEvent(simulatedEvent);
   };
 
+  useEffect(() => {
+    const handleMouseWheel = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      let x = e.deltaX;
+      let y = e.deltaY;
+
+      // Pixel units unless it's non-zero.
+      // Note that if deltamode is line or page won't matter since we aren't
+      // sending the mouse wheel delta to the server anyway.
+      // The difference between pixel and line can be important however since
+      // we have a threshold that can be smaller than the line height.
+      if (e.deltaMode !== 0) {
+        x *= WHEEL_LINE_HEIGHT;
+        y *= WHEEL_LINE_HEIGHT;
+      }
+
+      if (scrollInvert) {
+        x = x * -1;
+        y = y * -1;
+      }
+
+      x = Math.min(Math.max(x, -scroll), scroll);
+      y = Math.min(Math.max(y, -scroll), scroll);
+
+      sendMousePos(e);
+
+      if (!wheelThrottle.current) {
+        wheelThrottle.current = true;
+        sendData('wheel', { x, y });
+
+        window.setTimeout(() => {
+          wheelThrottle.current = false;
+        }, 100);
+      }
+    };
+
+    const textarea = ref.current;
+
+    textarea.addEventListener('mousewheel', handleMouseWheel, {
+      passive: false,
+    });
+
+    return () => {
+      textarea.removeEventListener('mousewheel', handleMouseWheel);
+    };
+  }, [scrollInvert, sendMousePos, sendData]);
+
   return (
     <textarea
       ref={ref}
@@ -178,41 +230,16 @@ function ControlLayerContent() {
         sendData('mouseup', { key: e.button + 1 });
         e.target.focus();
       }}
-      onWheel={(e) => {
+      onKeyDown={(e) => {
         e.stopPropagation();
         e.preventDefault();
-
-        let x = e.deltaX;
-        let y = e.deltaY;
-
-        // Pixel units unless it's non-zero.
-        // Note that if deltamode is line or page won't matter since we aren't
-        // sending the mouse wheel delta to the server anyway.
-        // The difference between pixel and line can be important however since
-        // we have a threshold that can be smaller than the line height.
-        if (e.deltaMode !== 0) {
-          x *= WHEEL_LINE_HEIGHT;
-          y *= WHEEL_LINE_HEIGHT;
-        }
-
-        if (scrollInvert) {
-          x = x * -1;
-          y = y * -1;
-        }
-
-        x = Math.min(Math.max(x, -scroll), scroll);
-        y = Math.min(Math.max(y, -scroll), scroll);
-
-        sendMousePos(e);
-
-        if (!wheelThrottle.current) {
-          wheelThrottle.current = true;
-          sendData('wheel', { x, y });
-
-          window.setTimeout(() => {
-            wheelThrottle.current = false;
-          }, 100);
-        }
+      }}
+      onKeyUp={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+      onChange={(e) => {
+        e.target.innerText = '';
       }}
       onTouchStart={onTouchHandler}
       onTouchEnd={onTouchHandler}
